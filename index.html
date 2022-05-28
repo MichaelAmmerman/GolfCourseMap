@@ -26,16 +26,38 @@
         const map = new Map({  // Create new map
           basemap: "satellite" // Basemap layer service
         });
-
+		const labelClass = {  // autocasts as new LabelClass()
+	symbol: {
+		type: "text",  // autocasts as new TextSymbol()
+		color: "black",
+		haloColor: "white",
+		haloSize: 1,
+		font: {  // autocast as new Font()
+			family: "Ubuntu Mono",
+			size: 14,
+			weight: "bold"
+     }
+  },
+		labelPlacement: "above-right",
+		labelExpressionInfo: {
+			expression: "$feature.Name"
+  }
+  };
+  
         const view = new MapView({
           map: map,
-          center: [-83.7200610, 37.5529119], // Longitude, latitude
+          center: [-83.7200610, 37.5538], // Longitude, latitude
           zoom: 17, // Zoom level
           container: "viewDiv",		  // Div element
 		  constraints: {
 		  rotationEnabled: true
 		  }
         });
+		
+		const popupGreens = { //popup for greens, uses the Number attribute
+        "title": "Greens",
+        "content": "<b>Green #</b> {Number}"
+      }
 		
 		const track = new Track({
           view: view,
@@ -64,17 +86,78 @@
         type: "simple",
         symbol: {
           style: "solid",
-          color: "#267300",
+          color: "#267300", // Uses Hex value for colors based on ArcPro map
           width: "1px",
 		  type: "simple-fill",
 			outline: {
-			style: "solid stroke",
+			style: "none",
 			width: "0px"
 			}
 			
         }
       };
 	  
+		const buildingRenderer = {  //Symbology for Buildings
+        type: "simple",
+        symbol: {
+          style: "solid",
+          color: "#3C994B", // Uses Hex value for colors based on ArcPro map
+          width: "1px",
+		  type: "simple-fill",
+			outline: {
+			style: "solid",
+			width: "1px",
+			color: "#000000"
+			}
+			
+        }
+      };
+	  
+	  const roadsRenderer = {  //Symbology for roads
+        type: "simple",
+        symbol: {
+          style: "solid",
+          color: "#000000", // Uses Hex value for colors based on ArcPro map
+          width: "1px",
+		  type: "simple-fill",
+			outline: {
+			style: "solid",
+			width: ".4px",
+			color: "#FFFFFF"
+			}
+			
+        }
+      };
+	  const pondRenderer = {  //Symbology for roads
+        type: "simple",
+        symbol: {
+          style: "solid",
+          color: "#0000FF", // Uses Hex value for colors based on ArcPro map
+          width: "1px",
+		  type: "simple-fill",
+			outline: {
+			style: "solid",
+			width: ".4px",
+			color: "#000000"
+			}
+			
+        }
+      };
+	  const cartPathRenderer = {  //Symbology for roads
+        type: "simple",
+        symbol: {
+          style: "solid",
+          color: "#4E4E4E", // Uses Hex value for colors based on ArcPro map
+          width: "1px",
+		  type: "simple-fill",
+			outline: {
+			style: "solid",
+			width: ".7px",
+			color: "#000000"
+			}
+			
+        }
+      };
 		const fringeRenderer = { //Symbolgy for fringe
 		type: "simple",
 		symbol: {
@@ -83,9 +166,7 @@
 			width: "10px",
 			type: "simple-fill",
 				outline: {
-              style: "solid stroke",
-			  width: "1px"
-			  
+		width: "1px" 
             }
 		}
 		};
@@ -121,7 +202,7 @@
 			width: "10px",
 			type: "simple-fill",
 				outline: {
-              style: "solid stroke",
+              style: "solid",
 			  width: "1px"
 			  
             }
@@ -130,12 +211,16 @@
 		
 		const pond = new FeatureLayer({
     url: "https://services6.arcgis.com/CvWxKlTCvoGtgSe5/arcgis/rest/services/Pond_FeaturesToJSON/FeatureServer/0",
-	opacity: 1
+	renderer: pondRenderer
   
   });
 		const green = new FeatureLayer ({
-		url: "https://services6.arcgis.com/CvWxKlTCvoGtgSe5/arcgis/rest/services/Green/FeatureServer/0",
+		url: "https://services6.arcgis.com/CvWxKlTCvoGtgSe5/arcgis/rest/services/Greens2/FeatureServer/0",
+		outFields: ["Number"],
+        popupTemplate: popupGreens,
 		renderer: greenRenderer
+		
+		
 		});
 		
 		const fringe = new FeatureLayer ({
@@ -154,29 +239,30 @@
 		});
 
 		const fairway = new FeatureLayer({
-		url: "https://services6.arcgis.com/CvWxKlTCvoGtgSe5/arcgis/rest/services/FairwayNumbersUnder/FeatureServer",
+		url: "https://services6.arcgis.com/CvWxKlTCvoGtgSe5/arcgis/rest/services/FairwayNumbersUnder/FeatureServer/0",
 		renderer: fairwayHtached
 		
 		});
 		
 		const fairway2 = new FeatureLayer({
-		url: "https://services6.arcgis.com/CvWxKlTCvoGtgSe5/arcgis/rest/services/FairwayNumbersUnder/FeatureServer",
+		url: "https://services6.arcgis.com/CvWxKlTCvoGtgSe5/arcgis/rest/services/FairwayNumbersUnder/FeatureServer/0",
 		renderer: fairway2Render
 		});
 		
 		const buildings = new FeatureLayer({
-		url: "https://services6.arcgis.com/CvWxKlTCvoGtgSe5/arcgis/rest/services/Buildings/FeatureServer"
-		
+		url: "https://services6.arcgis.com/CvWxKlTCvoGtgSe5/arcgis/rest/services/Buildings/FeatureServer/0",
+		renderer: buildingRenderer,
+		labelingInfo: [labelClass]
 		});
   
 		const roads = new FeatureLayer({
-		url: "https://services6.arcgis.com/CvWxKlTCvoGtgSe5/arcgis/rest/services/Roads/FeatureServer"
-		
+		url: "https://services6.arcgis.com/CvWxKlTCvoGtgSe5/arcgis/rest/services/Roads/FeatureServer",
+		renderer: roadsRenderer
 		});	
 		
 		const cartPath = new FeatureLayer({
-		url: "https://services6.arcgis.com/CvWxKlTCvoGtgSe5/arcgis/rest/services/CartPath/FeatureServer"
-		
+		url: "https://services6.arcgis.com/CvWxKlTCvoGtgSe5/arcgis/rest/services/CartPath/FeatureServer/0",
+		renderer: cartPathRenderer
 		})
   
   var layers = [pond, fringe, green, RedTees, WhiteTees, fairway2, fairway, buildings, roads, cartPath]; // stores layer names
